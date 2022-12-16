@@ -158,7 +158,7 @@ case `uname` in
       if [[ -n ${BAIL} ]]; then
         BC_CPU=$(nproc)
         BC_PROCESS=$(pgrep -nf ${BAIL_PROCESS})
-        if [[ ${BAIL_CPU} -eq ${BC_CPU} && $(pgrep -n ${BAIL_PROCESS}) -gt 0 ]]; then
+        if [[ ${BAIL_CPU} -eq ${BC_CPU} && ${BC_PROCESS} -gt 0 ]]; then
           echo "CPU STATISTICS bailing out because of matched bailout patterns (CPU number ${BAIL_CPU} matches and process ${BAIL_PROCESS} is running)"
           exit $STATE_OK
         fi
