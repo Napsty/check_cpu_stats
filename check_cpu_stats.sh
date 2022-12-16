@@ -14,8 +14,8 @@
 #
 # Copyright 2007-2009,2011 Steve Bosek
 # Copyright 2008 Bas van der Doorn
-# Copyright 2008 Phlipp Lemke
-# Copyright 2016 Philip Dallig
+# Copyright 2008 Philipp Lemke
+# Copyright 2016 Philipp Dallig
 # Copyright 2022 Claudio Kuenzler
 #
 # USAGE  : ./check_cpu_stats.sh [-w <user,system,iowait>] [-c <user,system,iowait>] ( [ -i <intervals in second> ] [ -n <report number> ])
