@@ -50,7 +50,7 @@ NUM_REPORT=${NUM_REPORT:="3"}
 # -----------------------------------------------------------------------------------------
 # Plugin variable description
 PROGNAME=$(basename $0)
-RELEASE="Revision 3.0.0"
+RELEASE="Revision 3.0.1"
 # -----------------------------------------------------------------------------------------
 # Check required commands
 if [ `uname` = "HP-UX" ];then
@@ -157,7 +157,7 @@ case `uname` in
       # Bail out possible under certain situations
       if [[ -n ${BAIL} ]]; then
         BC_CPU=$(nproc)
-        BC_PROCESS=$(pgrep -n ${BAIL_PROCESS})
+        BC_PROCESS=$(pgrep -nf ${BAIL_PROCESS})
         if [[ ${BAIL_CPU} -eq ${BC_CPU} && $(pgrep -n ${BAIL_PROCESS}) -gt 0 ]]; then
           echo "CPU STATISTICS bailing out because of matched bailout patterns (CPU number ${BAIL_CPU} matches and process ${BAIL_PROCESS} is running)"
           exit $STATE_OK
