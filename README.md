@@ -22,3 +22,4 @@ The script is a fork from the original check_cpu_stats plugin by Steve Bosek. It
 | 2.3.5   | 2009-05-05 | Steve Bosek | Bug fix in NAGIOS_DATA for HP-UX |
 | 2.3.6   | 2011-08-05 | Steve Bosek | Bug fix in NAGIOS_DATA : replace comma with semicolon in perfdata - compatibility with pnp |
 | ???   | 2016-06-11 | Philipp Dallig | Switch from ksh to bash |
+| 3.0.0   | 2022-12-16 | Claudio Kuenzler | Multiple changes, added `-b` parameters for bailing out under certain conditions |
