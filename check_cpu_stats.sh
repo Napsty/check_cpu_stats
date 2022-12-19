@@ -18,11 +18,11 @@
 # Copyright 2016 Philipp Dallig
 # Copyright 2022 Claudio Kuenzler
 #
-# USAGE  : ./check_cpu_stats.sh [-w <user,system,iowait>] [-c <user,system,iowait>] ( [ -i <intervals in second> ] [ -n <report number> ])
+# USAGE  : ./check_cpu_stats.sh [-w <user,system,iowait>] [-c <user,system,iowait>] ( [-i <report interval>] [-n <report number> ] [-b <N,processname>])
 #           
 # Exemple: ./check_cpu_stats.sh 
 #          ./check_cpu_stats.sh -w 70,40,30 -c 90,60,40
-#          ./check_cpu_stats.sh -w 70,40,30 -c 90,60,40 -i 3 -n 5
+#          ./check_cpu_stats.sh -w 70,40,30 -c 90,60,40 -i 3 -n 5 -b 1,apache2
 # 
 # ----------------------------------------------------------------------------------------
 #
@@ -50,7 +50,7 @@ NUM_REPORT=${NUM_REPORT:="3"}
 # -----------------------------------------------------------------------------------------
 # Plugin variable description
 PROGNAME=$(basename $0)
-RELEASE="Revision 3.0.1"
+RELEASE="Revision 3.1.0"
 # -----------------------------------------------------------------------------------------
 # Check required commands
 if [ `uname` = "HP-UX" ];then
@@ -77,13 +77,13 @@ print_usage() {
   echo ""
   echo "$PROGNAME $RELEASE - Monitoring plugin to check CPU Utilization"
   echo ""
-  echo "Usage: check_cpu_stats.sh [-w] [-c] [-i] [-n] [-b]"
+  echo "Usage: check_cpu_stats.sh [-w] [-c] [-i] [-n] [-b]+"
   echo ""
   echo "  -w  Warning threshold in % for warn_user,warn_system,warn_iowait CPU (default : 70,40,30)"
   echo "  -c  Critical threshold in % for crit_user,crit_system,crit_iowait CPU (default : 90,60,40)"
   echo "  -i  Interval in seconds for iostat (default : 1)"
   echo "  -n  Number of reports for iostat (default : 3)"
-  echo "  -b  The plugin will bail out and not collect CPU stats when condition matches (number of CPUs and process running), expects an input of N,process (e.g. 4,apache2)"
+  echo "  -b  The plugin will exit OK when condition matches (number of CPUs and process running), expects an input of N,process (e.g. 4,apache2). Can be used multiple times: -b 1,puppet -b 4,apache2 -b 4,containerd. Works only under Linux."
   echo "  -v  Show version"
   echo "  -h  Show this page"
   echo ""
@@ -111,7 +111,7 @@ do
   c)      LIST_CRITICAL_THRESHOLD=${OPTARG};;
   i)      INTERVAL_SEC=${OPTARG};;
   n)      NUM_REPORT=${OPTARG};;
-  b)      BAIL=${OPTARG};;
+  b)      BAIL+=("${OPTARG}");;
   h)      print_help;;
   v)      print_release;;
   *)      print_help;;
@@ -144,41 +144,42 @@ if [ ${TAB_WARNING_THRESHOLD[0]} -ge ${TAB_CRITICAL_THRESHOLD[0]} -o ${TAB_WARNI
   echo "ERROR : Critical CPU Threshold lower as Warning CPU Threshold "
   exit $STATE_WARNING
 fi 
-
-if [[ -n ${BAIL} ]]; then
-  BAIL_CPU=$(echo ${BAIL} | awk -F',' '{print $1}')
-  BAIL_PROCESS=$(echo ${BAIL} | awk -F',' '{print $2}')
-  if ! [[ ${BAIL_CPU} =~ ^[0-9]+$ ]]; then echo "ERROR: There was an error parsing the bail input. Verify your input. Seek help (-h)."; exit ${STATE_UNKNOWN}; fi
-fi
 # -----------------------------------------------------------------------------------------
 # CPU Utilization Statistics Unix Plateform ( Linux,AIX,Solaris are supported )
 case `uname` in
   Linux )
-      # Bail out possible under certain situations
-      if [[ -n ${BAIL} ]]; then
-        BC_CPU=$(nproc)
-        BC_PROCESS=$(pgrep -nf ${BAIL_PROCESS})
-        if [[ ${BAIL_CPU} -eq ${BC_CPU} && ${BC_PROCESS} -gt 0 ]]; then
-          echo "CPU STATISTICS bailing out because of matched bailout patterns (CPU number ${BAIL_CPU} matches and process ${BAIL_PROCESS} is running)"
-          exit $STATE_OK
-        fi
-      fi
-
       CPU_REPORT=`iostat -c $INTERVAL_SEC $NUM_REPORT | sed -e 's/,/./g' | tr -s ' ' ';' | sed '/^$/d' | tail -1`
       CPU_REPORT_SECTIONS=`echo ${CPU_REPORT} | grep ';' -o | wc -l`
       CPU_USER=`echo $CPU_REPORT | cut -d ";" -f 2`
       CPU_NICE=`echo $CPU_REPORT | cut -d ";" -f 3`
       CPU_SYSTEM=`echo $CPU_REPORT | cut -d ";" -f 4`
       CPU_IOWAIT=`echo $CPU_REPORT | cut -d ";" -f 5`
-    if [ ${CPU_REPORT_SECTIONS} -ge 6 ]; then
+      if [ ${CPU_REPORT_SECTIONS} -ge 6 ]; then
       CPU_STEAL=`echo $CPU_REPORT | cut -d ";" -f 6`
       CPU_IDLE=`echo $CPU_REPORT | cut -d ";" -f 7`
       NAGIOS_DATA="user=${CPU_USER}% system=${CPU_SYSTEM}%, iowait=${CPU_IOWAIT}%, idle=${CPU_IDLE}%, nice=${CPU_NICE}%, steal=${CPU_STEAL}% | CpuUser=${CPU_USER}%;${TAB_WARNING_THRESHOLD[0]};${TAB_CRITICAL_THRESHOLD[0]};0; CpuSystem=${CPU_SYSTEM}%;${TAB_WARNING_THRESHOLD[1]};${TAB_CRITICAL_THRESHOLD[1]};0; CpuIowait=${CPU_IOWAIT}%;${TAB_WARNING_THRESHOLD[2]};${TAB_CRITICAL_THRESHOLD[2]};0; CpuIdle=${CPU_IDLE}%;0;0;0; CpuNice=${CPU_NICE}%;0;0;0; CpuSteal=${CPU_STEAL}%;0;0;0;"
-    else
+      else
       CPU_IDLE=`echo $CPU_REPORT | cut -d ";" -f 6`
       NAGIOS_DATA="user=${CPU_USER}% system=${CPU_SYSTEM}%, iowait=${CPU_IOWAIT}%, idle=${CPU_IDLE}%, nice=${CPU_NICE}%, steal=0.00% | CpuUser=${CPU_USER}%;${TAB_WARNING_THRESHOLD[0]};${TAB_CRITICAL_THRESHOLD[0]};0; CpuSystem=${CPU_SYSTEM}%;${TAB_WARNING_THRESHOLD[1]};${TAB_CRITICAL_THRESHOLD[1]};0; CpuIowait=${CPU_IOWAIT}%;${TAB_WARNING_THRESHOLD[2]};${TAB_CRITICAL_THRESHOLD[2]};0; CpuIdle=${CPU_IDLE}%;0;0;0; CpuNice=${CPU_NICE}%;0;0;0; CpuSteal=0.0%;0;0;0;"
-    fi    
-            ;;
+      fi
+
+      # Bail out possible under certain situations
+      if [[ ${#BAIL[*]} -gt 0 ]]; then
+        BC_CPU=$(nproc)
+        o=0
+        for entry in ${BAIL[*]}; do
+          BAIL_CPU[${o}]=$(echo "${entry}" | awk -F',' '{print $1}')
+          BAIL_PROCESS[${o}]=$(echo "${entry}" | awk -F',' '{print $2}')
+          BC_PROCESS=$(pidof -s -x -o %PPID ${BAIL_PROCESS[${o}]})
+          if [[ ${BAIL_CPU[${o}]} -eq ${BC_CPU} && ${BC_PROCESS} -gt 0 ]]; then
+            echo "CPU STATISTICS OK - bailing out because of matched bailout patterns - ${NAGIOS_DATA}"
+            exit $STATE_OK
+          fi
+          let o++
+        done
+      fi
+
+      ;;
   AIX ) CPU_REPORT=`iostat -t $INTERVAL_SEC $NUM_REPORT | sed -e 's/,/./g'|tr -s ' ' ';' | tail -1`
       CPU_USER=`echo $CPU_REPORT | cut -d ";" -f 4`
       CPU_SYSTEM=`echo $CPU_REPORT | cut -d ";" -f 5`
