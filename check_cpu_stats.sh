@@ -18,18 +18,17 @@
 # Copyright 2016 Philipp Dallig
 # Copyright 2022 Claudio Kuenzler
 #
-# USAGE  : ./check_cpu_stats.sh [-w <user,system,iowait>] [-c <user,system,iowait>] ( [-i <report interval>] [-n <report number> ] [-b <N,processname>])
-#           
-# Exemple: ./check_cpu_stats.sh 
+# Usage:   ./check_cpu_stats.sh [-w <user,system,iowait>] [-c <user,system,iowait>] ( [-i <report interval>] [-n <report number> ] [-b <N,processname>])
+#
+# Example: ./check_cpu_stats.sh
 #          ./check_cpu_stats.sh -w 70,40,30 -c 90,60,40
 #          ./check_cpu_stats.sh -w 70,40,30 -c 90,60,40 -i 3 -n 5 -b 1,apache2
-# 
-# ----------------------------------------------------------------------------------------
-#
-# TODO:   - Support for MacOSX
-#
 # ========================================================================================
 # -----------------------------------------------------------------------------------------
+# Plugin description
+PROGNAME=$(basename $0)
+RELEASE="Revision 3.1.2"
+
 # Paths to commands used in this script.  These may have to be modified to match your system setup.
 export PATH=$PATH:/usr/local/bin:/usr/bin:/bin # Set path
 IOSTAT="iostat"
@@ -47,10 +46,6 @@ LIST_WARNING_THRESHOLD=${LIST_WARNING_THRESHOLD:="70,40,30"}
 LIST_CRITICAL_THRESHOLD=${LIST_CRITICAL_THRESHOLD:="90,60,40"}
 INTERVAL_SEC=${INTERVAL_SEC:="1"}
 NUM_REPORT=${NUM_REPORT:="3"}
-# -----------------------------------------------------------------------------------------
-# Plugin variable description
-PROGNAME=$(basename $0)
-RELEASE="Revision 3.1.1"
 # -----------------------------------------------------------------------------------------
 # Check required commands
 if [ `uname` = "HP-UX" ];then
@@ -167,9 +162,9 @@ case `uname` in
       if [[ ${#BAIL[*]} -gt 0 ]]; then
         BC_CPU=$(nproc)
         o=0
-        for entry in "${BAIL[*]}"; do
-          BAIL_CPU[${o}]=$(echo "${entry}" | awk -F',' '{print $1}')
-          BAIL_PROCESS[${o}]=$(echo "${entry}" | awk -F',' '{print $2}')
+	while [ ${o} -lt ${#BAIL[*]} ]; do
+          BAIL_CPU[${o}]=$(echo "${BAIL[${o}]}" | awk -F',' '{print $1}')
+          BAIL_PROCESS[${o}]=$(echo "${BAIL[${o}]}" | awk -F',' '{print $2}')
           BC_PROCESS=$(pgrep -fo "${BAIL_PROCESS[${o}]}")
           if [[ ${BAIL_CPU[${o}]} -eq ${BC_CPU} && ${BC_PROCESS} -gt 0 ]]; then
             echo "CPU STATISTICS OK - bailing out because of matched bailout patterns - ${NAGIOS_DATA}"
