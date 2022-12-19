@@ -25,3 +25,4 @@ The script is a fork from the original check_cpu_stats plugin by Steve Bosek. It
 | 3.0.0   | 2022-12-16 | Claudio Kuenzler | Multiple changes, added `-b` parameters for bailing out under certain conditions |
 | 3.0.1   | 2022-12-16 | Claudio Kuenzler | Use pgrep -f for full process name in bailout check conditions |
 | 3.1.0   | 2022-12-19 | Claudio Kuenzler | Change to pidof to avoid hitting own process, support multiple bailout conditions (multple `-b N,process` possible) |
+| 3.1.1   | 2022-12-19 | Claudio Kuenzler | Change bailout process check back to pgrep to support process match with spaces (e.g. `-b "12,starter --daemon"`) |

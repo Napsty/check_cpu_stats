@@ -50,7 +50,7 @@ NUM_REPORT=${NUM_REPORT:="3"}
 # -----------------------------------------------------------------------------------------
 # Plugin variable description
 PROGNAME=$(basename $0)
-RELEASE="Revision 3.1.0"
+RELEASE="Revision 3.1.1"
 # -----------------------------------------------------------------------------------------
 # Check required commands
 if [ `uname` = "HP-UX" ];then
@@ -167,10 +167,10 @@ case `uname` in
       if [[ ${#BAIL[*]} -gt 0 ]]; then
         BC_CPU=$(nproc)
         o=0
-        for entry in ${BAIL[*]}; do
+        for entry in "${BAIL[*]}"; do
           BAIL_CPU[${o}]=$(echo "${entry}" | awk -F',' '{print $1}')
           BAIL_PROCESS[${o}]=$(echo "${entry}" | awk -F',' '{print $2}')
-          BC_PROCESS=$(pidof -s -x -o %PPID ${BAIL_PROCESS[${o}]})
+          BC_PROCESS=$(pgrep -fo "${BAIL_PROCESS[${o}]}")
           if [[ ${BAIL_CPU[${o}]} -eq ${BC_CPU} && ${BC_PROCESS} -gt 0 ]]; then
             echo "CPU STATISTICS OK - bailing out because of matched bailout patterns - ${NAGIOS_DATA}"
             exit $STATE_OK
