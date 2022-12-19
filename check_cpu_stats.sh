@@ -27,7 +27,7 @@
 # -----------------------------------------------------------------------------------------
 # Plugin description
 PROGNAME=$(basename $0)
-RELEASE="Revision 3.1.2"
+RELEASE="Revision 3.1.3"
 
 # Paths to commands used in this script.  These may have to be modified to match your system setup.
 export PATH=$PATH:/usr/local/bin:/usr/bin:/bin # Set path
@@ -165,7 +165,7 @@ case `uname` in
 	while [ ${o} -lt ${#BAIL[*]} ]; do
           BAIL_CPU[${o}]=$(echo "${BAIL[${o}]}" | awk -F',' '{print $1}')
           BAIL_PROCESS[${o}]=$(echo "${BAIL[${o}]}" | awk -F',' '{print $2}')
-          BC_PROCESS=$(pgrep -fo "${BAIL_PROCESS[${o}]}")
+          BC_PROCESS=$(pidof "${BAIL_PROCESS[${o}]}")
           if [[ ${BAIL_CPU[${o}]} -eq ${BC_CPU} && ${BC_PROCESS} -gt 0 ]]; then
             echo "CPU STATISTICS OK - bailing out because of matched bailout patterns - ${NAGIOS_DATA}"
             exit $STATE_OK
