@@ -22,12 +22,12 @@
 #
 # Example: ./check_cpu_stats.sh
 #          ./check_cpu_stats.sh -w 70,40,30 -c 90,60,40
-#          ./check_cpu_stats.sh -w 70,40,30 -c 90,60,40 -i 3 -n 5 -b 1,apache2
+#          ./check_cpu_stats.sh -w 70,40,30 -c 90,60,40 -i 3 -n 5 -b '1,apache2' -b '1,running process'
 # ========================================================================================
 # -----------------------------------------------------------------------------------------
 # Plugin description
 PROGNAME=$(basename $0)
-RELEASE="Revision 3.1.3"
+RELEASE="Revision 3.1.4"
 
 # Paths to commands used in this script.  These may have to be modified to match your system setup.
 export PATH=$PATH:/usr/local/bin:/usr/bin:/bin # Set path
@@ -165,7 +165,7 @@ case `uname` in
 	while [ ${o} -lt ${#BAIL[*]} ]; do
           BAIL_CPU[${o}]=$(echo "${BAIL[${o}]}" | awk -F',' '{print $1}')
           BAIL_PROCESS[${o}]=$(echo "${BAIL[${o}]}" | awk -F',' '{print $2}')
-          BC_PROCESS=$(pidof "${BAIL_PROCESS[${o}]}")
+          BC_PROCESS=$(ps aux | grep "${BAIL_PROCESS[${o}]}" | egrep -v "(grep|check_cpu_stats)" | awk '{print $2}')
           if [[ ${BAIL_CPU[${o}]} -eq ${BC_CPU} && ${BC_PROCESS} -gt 0 ]]; then
             echo "CPU STATISTICS OK - bailing out because of matched bailout patterns - ${NAGIOS_DATA}"
             exit $STATE_OK
