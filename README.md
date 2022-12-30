@@ -3,6 +3,49 @@ check_cpu_stats is an open source monitoring plugin which uses `iostat` (from th
 
 The script is a fork from the original check_cpu_stats plugin by Steve Bosek. It was using ksh as Shell. The newer release now runs natively on the Bash shell and supports additional parameters.
 
+
+### Parameters
+
+All parameters are optional.
+
+| Parameter | Description | Default |
+| ----------| ----------- | ------- |
+| -w | Warning thresholds for cpu usage. Syntax: cpu_user,cpu_system,cpu_iowait. Must be used together with `-c`. | 70,40,30 |
+| -c | Warning thresholds for cpu usage. Syntax: cpu_user,cpu_system,cpu_iowait. Must be used together with `-w`. | 90,60,40 |
+| -i | Interval in seconds to run `iostat` in the background | 1 |
+| -n | Number of `iostat` reports to obtain average values | 3 |
+| -b | Bailout condition(s). The plugin will exit OK when condition matches (number of CPUs and process running), expects an input of N,process (e.g. 4,apache2). Can be used multiple times | - |
+| -v | Show version | - |
+| -h / --help | Show help | - |
+
+
+
+### Usage / Examples
+Basic CPU usage check without any options:
+
+```
+$ ./check_cpu_stats.sh 
+CPU STATISTICS OK : user=0.84% system=0.50%, iowait=0.00%, idle=98.66%, nice=0.00%, steal=0.00% | CpuUser=0.84%;70;90;0; CpuSystem=0.50%;40;60;0; CpuIowait=0.00%;30;40;0; CpuIdle=98.66%;0;0;0; CpuNice=0.00%;0;0;0; CpuSteal=0.00%;0;0;0;
+```
+
+CPU Usage check with thresholds. Warning alert when USER is above 50%, SYSTEM is above 30% and IOWAIT is above 10%. Critial alert when USER is above 80%, SYSTEM is above 50% and IOWAIT is above 30%:
+
+```
+$ ./check_cpu_stats.sh -w 50,30,10 -c 80,50,30
+CPU STATISTICS OK : user=1.17% system=0.25%, iowait=0.00%, idle=98.58%, nice=0.00%, steal=0.00% | CpuUser=1.17%;50;80;0; CpuSystem=0.25%;30;50;0; CpuIowait=0.00%;10;30;0; CpuIdle=98.58%;0;0;0; CpuNice=0.00%;0;0;0; CpuSteal=0.00%;0;0;0;
+```
+
+CPU Usage check with a bailout condition: `-b 'N,process to match'`. Bailout condition means if the number of processes match and the 'process to match' is currently running (seen with `ps aux`), the plugin will return OK, even if thresholds are hit:
+
+```
+$ ./check_cpu_stats.sh -w 50,30,10 -c 80,50,30 -b "12,sshd"
+CPU STATISTICS OK - bailing out because of matched bailout patterns - user=0.50% system=0.17%, iowait=0.00%, idle=99.33%, nice=0.00%, steal=0.00% | CpuUser=0.50%;50;80;0; CpuSystem=0.17%;30;50;0; CpuIowait=0.00%;10;30;0; CpuIdle=99.33%;0;0;0; CpuNice=0.00%;0;0;0; CpuSteal=0.00%;0;0;0;
+```
+
+
+
+
+
 ### History
 
 | Release | Date | Author(s) | Desciption/Modification |
