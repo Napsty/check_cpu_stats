@@ -1,0 +1,38 @@
+# @file 01-ubuntu.yml
+---
+name: Tests on Ubuntu
+
+# Trigger the workflow on push or pull request
+on: [push, pull_request]
+
+jobs:
+  help:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Install sysstat
+      run: |
+        sudo apt-get install -qq -yy sysstat
+    - name: Launch plugin with --help
+      run: |
+        ./check_cpu_stats.sh --help
+  execute:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Install sysstat
+      run: |
+        sudo apt-get install -qq -yy sysstat
+    - name: Launch plugin
+      run: |
+        ./check_cpu_stats.sh
+  thresholds:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Install sysstat
+      run: |
+        sudo apt-get install -qq -yy sysstat
+    - name: Launch plugin
+      run: |
+        ./check_cpu_stats.sh -w 60,50,20 -c 80,60,30
