@@ -15,7 +15,7 @@ jobs:
     - uses: actions/checkout@v1
     - name: Install sysstat
       run: |
-        sudo dnf -y install sysstat
+        dnf -y install sysstat
     - name: Launch plugin with --help
       run: |
         ./check_cpu_stats.sh --help
@@ -27,7 +27,7 @@ jobs:
     - uses: actions/checkout@v1
     - name: Install sysstat
       run: |
-        sudo dnf -y install sysstat
+        dnf -y install sysstat
     - name: Launch plugin
       run: |
         ./check_cpu_stats.sh
@@ -39,7 +39,7 @@ jobs:
     - uses: actions/checkout@v1
     - name: Install sysstat
       run: |
-        sudo dnf -y install sysstat
+        dnf -y install sysstat
     - name: Launch plugin
       run: |
         ./check_cpu_stats.sh -w 60,50,20 -c 80,60,30
