@@ -16,7 +16,7 @@
 # Copyright 2008 Bas van der Doorn
 # Copyright 2008 Philipp Lemke
 # Copyright 2016 Philipp Dallig
-# Copyright 2022 Claudio Kuenzler
+# Copyright 2022-2023 Claudio Kuenzler
 #
 # Usage:   ./check_cpu_stats.sh [-w <user,system,iowait>] [-c <user,system,iowait>] ( [-i <report interval>] [-n <report number> ] [-b <N,processname>])
 #
@@ -27,7 +27,7 @@
 # -----------------------------------------------------------------------------------------
 # Plugin description
 PROGNAME=$(basename $0)
-RELEASE="Revision 3.1.4"
+RELEASE="Revision 3.1.5"
 
 # Paths to commands used in this script.  These may have to be modified to match your system setup.
 export PATH=$PATH:/usr/local/bin:/usr/bin:/bin # Set path
@@ -55,7 +55,7 @@ if [ `uname` = "HP-UX" ];then
   fi
 else
   for cmd in iostat; do
-  if ! `which ${cmd} >/dev/null 2>&1`; then
+  if ! `command -v ${cmd} >/dev/null 2>&1`; then
     echo "UNKNOWN: ${cmd} does not exist, please check if command exists and PATH is correct"
     exit ${STATE_UNKNOWN}
   fi

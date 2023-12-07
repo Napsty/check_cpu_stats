@@ -72,3 +72,4 @@ CPU STATISTICS OK - bailing out because of matched bailout patterns - user=0.50%
 | 3.1.2   | 2022-12-19 | Claudio Kuenzler | Bugfix in loop when using multiple bailout input |
 | 3.1.3   | 2022-12-19 | Claudio Kuenzler | Change to pidof to avoid hitting own process |
 | 3.1.4   | 2022-12-30 | Claudio Kuenzler | Change to ps aux to allow process matching, not just executable name |
+| 3.1.5   | 2023-12-07 | Claudio Kuenzler | Use `command` instead of `which` to find required commands (issue #7) |
