@@ -1,0 +1,45 @@
+# @file 01-ubuntu.yml
+---
+name: Tests on Rocky Linux
+
+# Trigger the workflow on push or pull request
+on: [push, pull_request]
+
+jobs:
+  help:
+    name: Launch plugin with --help
+    runs-on: ubuntu-latest
+    container: 
+      image: rockylinux/rockylinux:9
+    steps:
+    - uses: actions/checkout@v1
+    - name: Install sysstat
+      run: |
+        dnf -y install sysstat
+    - name: Launch plugin with --help
+      run: |
+        ./check_cpu_stats.sh --help
+  execute:
+    runs-on: ubuntu-latest
+    container: 
+      image: rockylinux/rockylinux:9
+    steps:
+    - uses: actions/checkout@v1
+    - name: Install sysstat
+      run: |
+        dnf -y install sysstat
+    - name: Launch plugin
+      run: |
+        ./check_cpu_stats.sh
+  thresholds:
+    runs-on: ubuntu-latest
+    container: 
+      image: rockylinux/rockylinux:9
+    steps:
+    - uses: actions/checkout@v1
+    - name: Install sysstat
+      run: |
+        dnf -y install sysstat
+    - name: Launch plugin
+      run: |
+        ./check_cpu_stats.sh -w 60,50,20 -c 80,60,30
